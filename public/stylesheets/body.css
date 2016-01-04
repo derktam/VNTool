@@ -1,0 +1,15 @@
+@font-face {
+    font-family:'NanumGothic';
+    src: url('/fonts/NanumGothic.eot');
+    src: url('/fonts/NanumGothic.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/NanumGothic.woff') format('woff'),
+    url('/fonts/NanumGothic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family:'나눔고딕' 'NanumGothic', 'NanumGothic';
+    background-color: #000066;
+    font-size: 50px;
+}
