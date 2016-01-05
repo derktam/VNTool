@@ -1,15 +1,49 @@
 @font-face {
-    font-family:'NanumGothic';
-    src: url('/fonts/NanumGothic.eot');
-    src: url('/fonts/NanumGothic.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/NanumGothic.woff') format('woff'),
-    url('/fonts/NanumGothic.ttf') format('truetype');
+    font-family:'나눔고딕';
+    src: url('../fonts/NanumGothic.eot');
+    src: url('../fonts/NanumGothic.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/NanumGothic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family:'나눔펜';
+    src: url('../fonts/NanumPen.eot');
+    src: url('../fonts/NanumPen.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/NanumPen.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family:'나눔브러쉬';
+    src: url('../fonts/NanumBrush.eot');
+    src: url('../fonts/NanumBrush.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/NanumBrush.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family:'나눔바른고딕';
+    src: url('../fonts/NanumBarunGothic.eot');
+    src: url('../fonts/NanumBarunGothic.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/NanumBarunGothic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family:'나눔명조';
+    src: url('../fonts/NanumMyeongjo.eot');
+    src: url('../fonts/NanumMyeongjo.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/NanumMyeongjo.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
 body {
-    font-family:'나눔고딕' 'NanumGothic', 'NanumGothic';
-    background-color: #000066;
+    font-family:'나눔고딕', 'NanumGothic', 'NanumGothic';
     font-size: 50px;
 }
