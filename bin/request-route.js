@@ -1,10 +1,11 @@
 /**
  * Created by Minhyeong on 2016-01-04.
  */
-module.exports = function(app, main) {
-    console.log("request-route on");
 
-    app.get('/s', function(res,res,next){
+module.exports = function(app, main, pid) {
+    console.log("["+pid+"]request-route on");
+
+    app.get('/s', function(req,res,next){
         console.log("test");
     });
 
