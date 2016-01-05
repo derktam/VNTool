@@ -73,8 +73,8 @@
       <file leaf-file-name="request-route.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bin/request-route.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7241379" vertical-offset="0" max-vertical-offset="1045">
-              <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.27586207" vertical-offset="0" max-vertical-offset="1045">
+              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding>
                 <element signature="e#0#46#0" expanded="false" />
               </folding>
@@ -136,6 +136,9 @@
       </file>
     </leaf>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -162,7 +165,7 @@
     <option name="width" value="1415" />
     <option name="height" value="998" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
     <OptionsSetting value="true" id="Remove" />
     <OptionsSetting value="true" id="Checkout" />
@@ -525,12 +528,12 @@
       <option name="number" value="Default" />
       <updated>1451911414778</updated>
       <workItem from="1451911437206" duration="1337000" />
-      <workItem from="1451912790298" duration="6936000" />
+      <workItem from="1451912790298" duration="7111000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8273000" />
+    <option name="totallyTimeSpent" value="8448000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="72" y="75" width="1415" height="998" extended-state="0" />
@@ -787,8 +790,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bin/request-route.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7241379" vertical-offset="0" max-vertical-offset="1045">
-          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.27586207" vertical-offset="0" max-vertical-offset="1045">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding>
             <element signature="e#0#46#0" expanded="false" />
           </folding>
