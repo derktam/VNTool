@@ -7,14 +7,13 @@ module.exports = function(io, main, pid) {
     console.log("["+pid+"]socket-route on");
 
     io.sockets.on('connection', function(socket) {
-        console.log('Client Connected' + pid);
+        console.log("["+pid+"] connect" + pid);
 
 
         socket.on('disconnect', function (data) {
-            console.log('Client Disconnected' + pid);
+            console.log("["+pid+"] disconnect" + pid);
         });
     });
-
 
     return this;
 }
