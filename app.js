@@ -8,6 +8,7 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var debug = require('debug')('VNTool:server');
 var http = require('http');
+var socketio = require('socket.io');
 var app = express();
 
 http.globalAgent.maxSockets = Infinity;
@@ -28,19 +29,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
-//app.set('port', process.env.PORT || '3000');
+app.set('port', process.env.PORT || '3000');
 
-var server = http.createServer(app);
 
 //-------------------------------------- server start -----------------------------------------------------
-/*
+var server = http.createServer(app);
 server.listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
-*/
+
+var io = socketio.listen(server, {
+    'log level': 2
+});
 
 // module return
 module.exports = {
     server:server,
-    app:app
+    app:app,
+    io:io
 };

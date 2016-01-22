@@ -4,7 +4,7 @@
 
 module.exports = function(io, main, pid) {
     this.temp = 1;
-    console.log("["+pid+"]socket-route on");
+    console.log("[load]socket-route on");
 
     io.sockets.on('connection', function(socket) {
         console.log("["+pid+"] connect" + pid);
