@@ -3,8 +3,185 @@ extends layout
 
 // body start
 block content
-    h1 어서오세요 #{id}
-    p Welcome to #{title}
-    p kkkk #{temp}
+    body.skin-5
+    .container
+        // Top Navigation
+        .codrops-top.clearfix
+            a.codrops-icon.codrops-icon-prev(href='http://tympanus.net/Development/MorphingSearch/')
+                span Previous Demo
+            | &#x9;&#x9;&#x9;&#x9;
+            span.right
+                a.codrops-icon.codrops-icon-drop(href='http://tympanus.net/codrops/?p=21275')
+                    span Back to the Codrops Article
+        | &#x9;&#x9;&#x9;
+        .content
+            header.codrops-header
+                h1
+                    | Drag and Drop Interaction Ideas
+                    span Inspiration for drag and drop interactions for the modern UI
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                nav.codrops-demos
+                    a(href='index.html') Bottom Area
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a(href='sidebar.html') Sidebar
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a(href='page-scale.html') Page Scale
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a(href='modal.html') Modal
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a(href='icons.html') Icons
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a.current-demo(href='bottom-slide.html') Bottom Slide
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    a(href='reveal.html') Reveal
+            | &#x9;&#x9;&#x9;&#x9;
+            #grid.grid.clearfix
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                .grid__item
+                    i.fa.fa-fw.fa-code
+            // Related demos
+            section.related
+                p If you enjoyed this demo you might also like:
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                a(href='http://tympanus.net/Development/DraggableDualViewSlideshow/')
+                    img(src='img/related/DualViewSlideshow.png', alt='Dual-View Slideshow Image')
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    h3 Draggable Dual-View Slideshow
+                | &#x9;&#x9;&#x9;&#x9;&#x9;
+                a(href='http://tympanus.net/Development/ButtonComponentMorph/')
+                    img(src='img/related/MorphingButtons.png', alt='Morphing Buttons Image')
+                    | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;
+                    h3 Morphing Buttons Concept
+        // /content
+    // /container
+    #drop-area.drop-area
+        div
+            .dummy
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-excel-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-pdf-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-sound-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-word-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-archive-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-text-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-archive-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-image-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-powerpoint-o
+            | &#x9;&#x9;&#x9;&#x9;
+            .drop-area__item
+                i.fa.fa-fw.fa-file-code-o
+    | &#x9;&#x9;
+    .drop-overlay
+    | &#x9;&#x9;
+    script(src='javascripts/draggabilly.pkgd.min.js')
+    | &#x9;&#x9;
+    script(src='javascripts/dragdrop.js')
+    | &#x9;&#x9;
+    script.
+        (function() {
+            var body = document.body,
+                    dropArea = document.getElementById( 'drop-area' ),
+                    droppableArr = [], dropAreaTimeout;
+            // initialize droppables
+            [].slice.call( document.querySelectorAll( '#drop-area .drop-area__item' )).forEach( function( el ) {
+                droppableArr.push( new Droppable( el, {
+                    onDrop : function( instance, draggableEl ) {
+                        // show checkmark inside the droppabe element
+                        classie.add( instance.el, 'drop-feedback' );
+                        clearTimeout( instance.checkmarkTimeout );
+                        instance.checkmarkTimeout = setTimeout( function() {
+                            classie.remove( instance.el, 'drop-feedback' );
+                        }, 800 );
+                        // ...
+                    }
+                } ) );
+            } );
+            // initialize draggable(s)
+            [].slice.call(document.querySelectorAll( '#grid .grid__item' )).forEach( function( el ) {
+                new Draggable( el, droppableArr, {
+                    draggabilly : { containment: document.body },
+                    scroll : true,
+                    scrollable : '#drop-area',
+                    scrollSpeed : 20,
+                    scrollSensitivity : 10,
+                    onStart : function() {
+                        classie.add( body, 'drag-active' );
+                        // clear timeout: dropAreaTimeout (toggle drop area)
+                        clearTimeout( dropAreaTimeout );
+                        // show dropArea
+                        classie.add( dropArea, 'show' );
+                    },
+                    onEnd : function( wasDropped ) {
+                        var afterDropFn = function() {
+                            // hide dropArea
+                            classie.remove( dropArea, 'show' );
+                            // remove class 'drag-active' from body
+                            classie.remove( body, 'drag-active' );
+                        };
+                        if( !wasDropped ) {
+                            afterDropFn();
+                        }
+                        else {
+                            // after some time hide drop area and remove class 'drag-active' from body
+                            clearTimeout( dropAreaTimeout );
+                            dropAreaTimeout = setTimeout( afterDropFn, 400 );
+                        }
+                    }
+                } );
+            } );
+        })();
+
 
 // body end

@@ -1,11 +1,10 @@
 /**
  * Created by Minhyeong on 2016-01-04.
  */
-var www = require('../app');
-var websocket = require('./websocket')(www.io, this, process.pid);
-var socket = require('./socket')(this, process.pid);
+
+var www = require('../app'),
+    websocket = require('./websocket')(www.io, this, process.pid),
+    socket1 = require('./socket')(this, 7004),
+    socket2 = require('./socket')(this, 7005);
 
 this.obj = require('./obj');
-console.log(this.obj);
-
-
