@@ -1,0 +1,59 @@
+/**
+ * Created by Minhyeong on 2016-01-23.
+ */
+var pg = require('pg');
+var psql_ip = '127.0.0.1';
+var psql_port = '5432';
+var id = 'postgres';
+var pw = '13241234';
+var conString = "postgres://"+id+":"+pw+"@localhost/srm_new";
+
+
+var check_client = function(pbip,cb){
+    pg.connect(conString, function(err, client, done) {
+        if(err) {
+            cb(null);
+            return console.error('error fetching client from pool', err);
+        }
+        pbip = pbip.replace(/:/gi,"");
+        pbip = pbip.replace(/f/gi,"");
+        console.log(pbip);
+        client.query('SELECT * FROM clients WHERE public_ip = $1',[pbip], function(err, result) {
+            //call `done()` to release the client back to the pool
+            done();
+
+            if(err) {
+                cb(null);
+                return console.error('error running query', err);
+            }
+            cb(null,result.rows.length);
+        });
+    });
+}
+
+var insert_client = function(name,pbip,cb){
+    pg.connect(conString, function(err, client, done) {
+        if(err) {
+            cb(null,false);
+            return console.error('error fetching client from pool', err);
+        }
+        pbip = pbip.replace(/:/gi,"");
+        pbip = pbip.replace(/f/gi,"");
+        console.log(pbip);
+        client.query('INSERT INTO clients (name, public_ip, private_ip) VALUES($1, $2, $3)', [name, pbip, '127.0.0.1'], function(err, result) {
+            //call `done()` to release the client back to the pool
+            done();
+
+            if(err) {
+                cb(null,false);
+                return console.error('error running query', err);
+            }
+            cb(null,true);
+        });
+    });
+}
+
+module.exports = {
+    check_client:check_client,
+    insert_client:insert_client
+};

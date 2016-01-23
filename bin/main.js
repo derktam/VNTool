@@ -7,4 +7,5 @@ var www = require('../app'),
     socket1 = require('./socket')(this, 7004),
     socket2 = require('./socket')(this, 7005);
 
+this.psql = require('./psql.js');
 this.obj = require('./obj');

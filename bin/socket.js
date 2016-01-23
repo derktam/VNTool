@@ -2,7 +2,7 @@
  * Created by Minhyeong on 2016-01-22.
  */
 var net = require('net');
-
+var async = require('async');
 module.exports = function(main, port) {
     var server = net.createServer(function (client) {
         if(port >= 7006)   main.obj['user'].add(client);
@@ -11,8 +11,7 @@ module.exports = function(main, port) {
         console.log('   remote = %s', client.remoteAddress + ":" + client.remotePort);
         client.setEncoding('utf8');
         client.on('data', function (data) {
-            console.log('Received data from client on port %d: %s',
-                client.remotePort, data.toString());
+            console.log('Received data from client on port %d: %s', client.remotePort, data.toString());
             console.log('  Bytes received: ' + client.bytesRead);
             if(port == 7004){
                 var packet = json_parse(data);
@@ -26,17 +25,49 @@ module.exports = function(main, port) {
                     case 'welcome':
                         if(packet.data == 'encrypt'){
                             console.log("Encrypt Check OK");
-                            var packet = create_packet('welcome', "tpyrcne", true, client);
+                            var packet = create_packet('welcome', 'tpyrcne', true, client);
                             send(client,packet);
                         }else{
                             console.log("Encrypt Session Fail");
                             this.end();
                         }
                         break;
-                    case 'hsfinish':
-                        if(packet.data == 'okok') {
+                    case 'hs_finish':
+                        if(packet.data == 'ok') {
                             console.log("HandShake 끝!");
+                            async.waterfall([
+                                function(cb) {
+                                    main.psql.check_client(client.localAddress,cb);
+                                },
+                                function(check,cb) {
+                                    console.log(check);
+                                    if(check > 0){
+                                        var packet = create_packet('name_check', 'ok', true, client);
+                                        send(client,packet);
+                                    }else {
+                                        var packet = create_packet('name_check', 'name', true, client);
+                                        send(client, packet);
+                                    }
+                                }
+                            ]);
                         }
+                        break;
+                    case 'name_check':
+                        console.log(packet.data);
+                        async.waterfall([
+                            function(cb) {
+                                main.psql.insert_client(packet.data,client.localAddress, cb);
+                            },
+                            function(check,cb) {
+                                if(check){
+                                    var packet = create_packet('name_check', 'ok', true, client);
+                                    send(client,packet);
+                                }else{
+                                    var packet = create_packet('name_check', 'retry', true, client);
+                                    send(client,packet);
+                                }
+                            }
+                        ]);
                         break;
                 }
             }else{
@@ -75,27 +106,28 @@ module.exports = function(main, port) {
     var json_parse = function(data){
         var result;
         try {
-            result = JSON.parse(data);
-            result.data = main.obj.key.decrypt(result.data,'utf8');
+            result = main.obj.key.decrypt(data,'utf8');
+            result = JSON.parse(result);
+            return result;
         }catch(e){
             try{
                 result = JSON.parse(data);
+                return result;
             }catch(e) {
                 return -1;
             }
         }
-        return result;
     }
     var create_packet = function(type, data, encrypt, client){
-        if(encrypt){
-            data = main.obj.proxy.get(client).key.encrypt(data,'base64');
-        }
-
         var tmp = {
             type : type,
             data : data
         }
         var packet = JSON.stringify(tmp);
+
+        if(encrypt)
+            packet = main.obj.proxy.get(client).key.encrypt(packet,'base64');
+
         return packet;
     }
 
