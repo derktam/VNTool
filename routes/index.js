@@ -1,13 +1,11 @@
 var express = require('express');
+var main = require('../bin/main');
 var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-
     var param = {
-        title: '123123',
-        temp: '3313',
-        id: 'test'
+        clients: main.obj.client.session
     };
 
     res.render('index', param);

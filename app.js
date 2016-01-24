@@ -42,6 +42,8 @@ var io = socketio.listen(server, {
     'log level': 2
 });
 
+io.sockets.setMaxListeners(0);
+
 // module return
 module.exports = {
     server:server,
