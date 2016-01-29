@@ -10,24 +10,23 @@ var user = [];
 var client = [];
 /* proxy 객체*/
 var proxy = [];
-
-/* link_wait_queue 객체*/
-var link_wait_queue = [];
+/* wait_client 객체 */
+var wait_client = [];
 
 /* port */
 var port = 7006;
 var proxy_id = 0;
+var test = 0;
 
 user.session = [];
 client.session = [];
 proxy.session = [];
 
-
-user['add'] = function (socket,port) {
+user['add'] = function (socket,port,callback) {
     var tmp = [];
     var ip = socket.remoteAddress.replace(/:/gi,"");
     ip = ip.replace(/f/gi,"");
-    var tmp2 = proxy.get_by_user_ip_port(ip,port);
+    var tmp2 = proxy.get_by_user_ip_port(ip, port);
     if(tmp2 == -1)  return -1;
     var id = socket.remoteAddress + ":" + socket.remotePort;
     for(var i=0;i<user.session.length;i++){
@@ -39,41 +38,99 @@ user['add'] = function (socket,port) {
     tmp.ip = ip;
     tmp.port = port;
     tmp.socket = socket;
+    tmp.proxy = tmp2;
+    tmp.target_id = undefined;
     tmp.target_socket = undefined;
-    tmp.target_name = tmp2.client_name;
-    tmp.packet_queue = [];
-
     user.session.push(tmp);
 
-    console.log(socket.remoteAddress + ":" + socket.remotePort + "추가");
-
-    return {
-        user_id:id,
-        client_pr_ip:tmp2.client_pr_ip,
-        client_port:tmp2.client_port,
-        client_cmd_socket:tmp2.client_cmd_socket
-    };
+    console.log("[USER ADD] : " + id);
+    callback(id + "|" + tmp2.client_pr_ip + "|" + tmp2.client_port,tmp2.client_cmd_socket);
 };
 
-user['delete'] = function (socket) {
+user['get_target_socket'] = function (socket) {
     for(var i=0;i<user.session.length;i++){
         if(Object.is(user.session[i].socket,socket)){
+            return user.session[i].target_socket;
+        }else if(Object.is(user.session[i].target_socket,socket)){
+            return user.session[i].socket;
+        }
+    }
+    return -1;
+};
+user['get'] = function (socket) {
+    for(var i=0;i<user.session.length;i++){
+        if(Object.is(user.session[i].socket,socket)){
+            return user.session[i];
+        }else if(Object.is(user.session[i].target_socket,socket)){
+            return user.session[i];
+        }
+    }
+    return -1;
+};
+
+user['check_wait'] = function (ip,port) {
+    for(var i=0;i<user.session.length;i++){
+        if(user.session[i].ip == ip && user.session[i].port == port){
+            if(user.session[i].target_socket == undefined){
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+user['delete'] = function (socket, flag) {
+    for(var i=0;i<user.session.length;i++){
+        if(Object.is(user.session[i].socket,socket)){
+            if(user.session[i].target_socket != undefined)  user.session[i].target_socket.end();
             user.session.splice(i,1);
-            console.log(socket.remoteAddress + ":" + socket.remotePort + "제거");
+            console.log("[user][delete] 성공");
+            break;
+        }else if(Object.is(user.session[i].target_socket,socket)){
+            if(user.session[i].socket != undefined)  user.session[i].socket.end();
+            user.session.splice(i,1);
+            console.log("[user][delete] 성공");
             break;
         }
     }
+    if(flag){
+        socket.end();
+    }
 };
 
-user['link'] = function (socket) {
-
-
+user['link'] = function (user_id, client_id, socket, callback) {
+    for(var i=0;i<user.session.length;i++){
+        if( user.session[i].id == user_id ){
+            user.session[i].target_id = client_id;
+            user.session[i].target_socket = socket;
+            console.log("[LINK] socket 완료");
+            callback(user.session[i]);
+            return true;
+        }
+    }
+    return false;
 };
 
-user['drop'] = function (socket) {
+wait_client['add']  = function (socket){
+    var tmp = [];
+    tmp.id = socket.remoteAddress;
+    tmp.id = tmp.id.replace(/:/gi,"");
+    tmp.id = tmp.id.replace(/f/gi,"");
+    tmp.id = tmp.id + ":" + socket.remotePort;
+    tmp.socket = socket;
+    wait_client.push(tmp);
+    console.log("[wait_client][add] " + tmp.id);
+}
 
+wait_client['get']  = function (id){
+    for(var i=0;i<wait_client.length;i++){
+        if(wait_client[i].id == id){
+            return wait_client[i];
+        }
+    }
 
-};
+    return -1;
+}
 
 client['add'] = function (socket, isCmd, pbkey) {
     var tmp = [];
@@ -90,7 +147,7 @@ client['add'] = function (socket, isCmd, pbkey) {
 
     client.session.push(tmp);
 
-    console.log(socket.remoteAddress + ":" + socket.remotePort + "추가");
+    console.log(socket.remoteAddress + ":" + socket.remotePort + "추가(" + client.session.length +")");
 };
 
 client['connect'] = function (socket, name) {
@@ -101,11 +158,12 @@ client['connect'] = function (socket, name) {
 client['delete'] = function (socket) {
     for(var i=0;i<client.session.length;i++){
         if(Object.is(client.session[i].socket,socket)){
+            console.log("[client][delete]" + socket.remoteAddress + ":" + socket.remotePort + "제거(" + (client.session.length-1) +")");
             client.session.splice(i,1);
-            console.log(socket.remoteAddress + ":" + socket.remotePort + "제거");
-            break;
+            return true;
         }
     }
+    return false;
 };
 
 client['get_by_name'] = function (name) {
@@ -133,55 +191,6 @@ client['get_by_pb_ip'] = function (ip) {
     return -1;
 };
 
-client['link'] = function (socket) {
-
-
-};
-
-client['drop'] = function (socket) {
-
-
-};
-
-proxy['link'] = function (socket, ip, port, flag) {
-    for(var i=0;i<proxy.session.length;i++){
-        if(flag){
-            if(proxy.session[i].user_port == port && proxy.session[i].user_ip == ip && proxy.session[i].state == 1){
-                if(proxy.session[i].client_id != "")    proxy.session[i].state = 2;
-                proxy.session[i].user_id = socket.remoteAddress + ":" + socket.remotePort;
-                proxy.session[i].user_socket = socket;
-                console.log("User Link 완료!!");
-                return true;
-            }
-        }else{
-            console.log(proxy.session[i].state);
-            if(port == 7005 && proxy.session[i].client_pb_ip == ip && (proxy.session[i].state == 0 || proxy.session[i].state == 1)){
-                if(proxy.session[i].user_id != "")    proxy.session[i].state = 2;
-                proxy.session[i].client_id = socket.remoteAddress + ":" + socket.remotePort;
-                proxy.session[i].client_socket = socket;
-                console.log("Client Link 완료!!");
-                return true;
-            }
-        }
-    }
-    return false;
-};
-
-proxy['cross_send'] = function (socket) {
-    for(var i=0;i<proxy.session.length;i++){
-        if(proxy.session[i].state == 2){
-            if(Object.is(proxy.session[i].client_socket,socket)){
-                if(proxy.session[i].user_socket == "")  return -1;
-                return proxy.session[i].user_socket;
-            }else if(Object.is(proxy.session[i].user_socket,socket)){
-                if(proxy.session[i].client_socket == "")  return -1;
-                return proxy.session[i].client_socket;
-            }
-        }
-    }
-    return -1;
-};
-
 proxy['get_by_user_ip_port'] = function (ip,port) {
     for(var i=0;i<proxy.session.length;i++){
         if(proxy.session[i].user_ip == ip && proxy.session[i].user_port == port && proxy.session[i].state == 1){
@@ -194,6 +203,13 @@ proxy['get_by_user_ip_port'] = function (ip,port) {
 proxy['add'] = function (data,socket) {
     var tmp = [];
     var session  = client.get_by_name(data.client_name);
+    for(var i=0;i<proxy.session.length;i++){
+        if(proxy.session[i].user_ip == data.user_ip && proxy.session[i].user_port == data.user_port){
+            console.log("[proxy][add]중복 되어있음! 기존 정책을 삭제!");
+            proxy.session.splice(i,1);
+        }
+    }
+
     if(session != undefined){
         tmp.id = proxy_id;
         proxy_id++;
@@ -213,15 +229,12 @@ proxy['add'] = function (data,socket) {
     return false;
 };
 
-proxy['delete'] = function (socket) {
-
-};
-
 module.exports = {
     user:user,
     client:client,
     proxy:proxy,
-    link_wait_queue:link_wait_queue,
+    wait_client:wait_client,
     key:key,
+    test:test,
     port:port
 };

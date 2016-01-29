@@ -5,7 +5,7 @@ var pg = require('pg');
 var psql_ip = '127.0.0.1';
 var psql_port = '5432';
 var id = 'postgres';
-var pw = '13241234';
+var pw = 'comtrue';
 var conString = "postgres://"+id+":"+pw+"@localhost/srm_new";
 
 

@@ -3,38 +3,41 @@
  */
 var net = require('net');
 var async = require('async');
+var util = require('util');
 
 module.exports = function(main, port) {
     var server = net.createServer(function (client) {
-        if(port >= 7006)   main.obj['user'].add(client);
+        var target_socket = undefined;
         console.log('Client connection: ');
         console.log('   local = %s:%s', client.localAddress, client.localPort);
         console.log('   remote = %s', client.remoteAddress + ":" + client.remotePort);
-        client.setEncoding('utf8');
-        client.setMaxListeners(0);
         var ip = client.remoteAddress.replace(/:/gi,"");
         ip = ip.replace(/f/gi,"");
-
-        if(port >= 7006){
-            var result = main.obj.user.add(client,port);
-            if( result == -1 ) {
-                console.log("껒여!");
-                client.end();
-                return;
-            }else if( result == 0 )
-                return;
-            var tmp = result.user_id + ":" + result.client_pr_ip + ":" + result.client_port;
-            var packet = create_packet('proxy_link', tmp, true, result.client_cmd_socket);
-            send(result.client_cmd_socket,packet);
-        }else if(port == 7005){
-            if( !main.obj.proxy.link(client, ip, port, false) ){
-                client.end();
+        client.setMaxListeners(0);
+        if(port == 7004) {
+            target_socket = client;
+            client.setEncoding('utf8');
+        } else {
+            client.pause();
+            if(port >= 7006){
+                var check_wait_interval = setInterval(function(){
+                    if(!main.obj.user.check_wait(ip,port)){
+                        clearInterval(check_wait_interval);
+                        main.obj.user.add(client,port, function(packet, socket){
+                            console.log("####[proxy_link]" + packet);
+                            packet = create_packet('proxy_link', packet, true, socket);
+                            console.log(socket.remotePort);
+                            send(socket, packet);
+                        });
+                    }
+                },100);
+            }else{
+                main.obj.wait_client.add(client);
             }
         }
-
         client.on('data', function (data) {
             //console.log('Received data from client on port %d: %s', client.remotePort, data.toString());
-            console.log('  Bytes received: ' + client.bytesRead);
+            //console.log('[' +port+']  Bytes received: ' + client.bytesRead);
             if(port == 7004){
                 var packet = json_parse(data);
                 if(packet == -1)    return;
@@ -67,7 +70,6 @@ module.exports = function(main, port) {
                                         send(client,packet);
                                         console.log('[7004][접속 성공] ' + name  + " [" + client.localAddress + "]");
                                         main.obj.client.connect(client,name);
-                                        console.log(main.obj.client.get(client).name);
                                     }else {
                                         var packet = create_packet('name_check', 'name', true, client);
                                         send(client, packet);
@@ -86,8 +88,7 @@ module.exports = function(main, port) {
                                     var packet = create_packet('name_check', 'ok', true, client);
                                     send(client,packet);
                                     console.log('[7004][접속 성공] ' + name  + " [" + client.localAddress + "]");
-                                    main.obj.client.connect(client,name);
-                                    console.log(main.obj.client.get(client).name);
+                                    main.obj.client.connect(client,name,client);
                                 }else{
                                     var packet = create_packet('name_check', 'retry', true, client);
                                     send(client,packet);
@@ -95,8 +96,23 @@ module.exports = function(main, port) {
                             }
                         ]);
                         break;
+                    case 'link':
+                        var tmp = packet.data.split('|');
+                        console.log("[link 명령] " + tmp);
+                        var wait_interval = setInterval(function(){
+                            var result = main.obj.wait_client.get(tmp[1]);
+                            if(result != -1){
+                                clearInterval(wait_interval);
+                                main.obj.user.link(tmp[0],tmp[1],result.socket,function(session) {
+                                    console.log("resume!");
+                                    session.socket.resume();
+                                    session.target_socket.resume();
+                                });
+                            }
+                        },500);
+
+                        break;
                     case 'link_ok':
-                        console.log(ip + ":" + packet.data);
                         var tmp = ip + ":" + packet.data;
                         for(var i=0;i<main.obj.proxy.session.length;i++){
                             var tmp2 = main.obj.proxy.session[i].client_pb_ip + ":" + main.obj.proxy.session[i].client_pr_ip + ":" + main.obj.proxy.session[i].client_port;
@@ -120,46 +136,47 @@ module.exports = function(main, port) {
                                 break;
                             }
                         }
-
                         break;
                 }
-            }else if(port == 7005){
-                var tmp = main.obj.proxy.cross_send(client);
-                if(tmp == -1){
-                    console.log("데이터 손실 있음!");
-                    return;
-                }
-                //var packet = main.obj.key.decrypt(data,'utf8');
-                var packet = data;
-                send(tmp,packet);
             }else{
-                var tmp = main.obj.proxy.get_client_pb_ip_by_user_id(client.remoteAddress + ":" + client.remotePort);
-                if(tmp == -1){
-                    console.log("데이터 손실 있음!");
-                    return;
-                }
-                //var packet = main.obj.client.get_by_pb_ip(tmp).key.encrypt(data,'base64');
-                var packet = data;
-                tmp = main.obj.proxy.cross_send(client);
-                if(tmp == -1)   return;
-                send(tmp,packet);
+                var tmp = main.obj.user.get(client);
+                if(tmp != -1){
+                    if(port == 7005)    target_socket = tmp.socket;
+                    else                target_socket=tmp.target_socket;
+                    send(target_socket,data,client);
+                }else    console.log("tmp = -1");
             }
         });
+
+        client.on('drain', function () {
+            console.log('[drain]'+port);
+            target_socket.resume();
+        });
+
         client.on('end', function () {
             console.log('Client disconnected');
+            if(port != 7004)
+                main.obj.user.delete(client,false);
+            else
+                main.obj.client.delete(client);
+
             server.getConnections(function (err, count) {
                 console.log('Remaining Connections: ' + count);
             });
         });
         client.on('error', function (err) {
             console.log('Socket Error: ', JSON.stringify(err));
-            //.obj['user'].delete(client);
-            //main.obj['client'].delete(client);
+            console.log(util.inspect(err));
+            if(port != 7004)
+                main.obj.user.delete(client,true);
+            else
+                main.obj.client.delete(client);
         });
         client.on('timeout', function () {
             console.log('Socket Timed out');
         });
     });
+
     server.listen(port, function () {
         console.log('Server listening: ' + port);
         server.on('close', function () {
@@ -198,15 +215,26 @@ module.exports = function(main, port) {
         return packet;
     }
 
-    function send(socket, data) {
-        var success = !socket.write(data);
-        if (!success) {
-            (function (socket, data) {
-                socket.once('drain', function () {
-                    send(socket, data);
-                });
-            })(socket, data);
+    function send(socket, data, ori_socket) {
+        if(ori_socket != undefined){
+            ori_socket.pause();
         }
+        console.log("[전송][" + data.length + "]");
+        async.waterfall([
+            function(cb) {
+                var success = socket.write(data,function(){
+                    cb(null,success,socket,data,ori_socket);
+                });
+            },
+            function(success,socket,data,ori_socket,cb) {
+                if (success) {
+                    console.log("[성공][" + data.length + "]");
+                    if(ori_socket != undefined){
+                        ori_socket.resume();
+                    }
+                }
+            }
+        ]);
     }
     return {
         create_packet:create_packet,
