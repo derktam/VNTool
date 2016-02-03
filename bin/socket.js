@@ -97,7 +97,7 @@ module.exports = function(main, port) {
                                 }
                             },
                             function(check,name,cb) {
-                                if(check){
+                                if(check && name.length > 0){
                                     var packet = create_packet('name_check', 'ok', true, client);
                                     send(client,packet);
                                     console.log('[6004][접속 성공] ' + name  + " [" + ip + "]");
