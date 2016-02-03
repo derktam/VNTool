@@ -71,7 +71,7 @@ module.exports = function(main, port) {
                                 },
                                 function(check,name,cb) {
                                     if(check){
-                                        if(main.obj.get_by_name(name) == -1) {
+                                        if(main.obj.client.get_by_name(name) == -1) {
                                             var packet = create_packet('name_check', 'ok', true, client);
                                             send(client, packet);
                                             console.log('[6004][접속 성공] ' + name + " [" + ip + "]");
