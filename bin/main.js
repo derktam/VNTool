@@ -4,12 +4,12 @@
 
 var www = require('./../app'),
     websocket = require('./websocket')(www.io, this),
-    socket1 = require('./socket')(this, 7004),
-    socket2 = require('./socket')(this, 7005),
-    socket3 = require('./socket')(this, 7006),
-    socket4 = require('./socket')(this, 7007),
-    socket5 = require('./socket')(this, 7008),
-    socket6 = require('./socket')(this, 7009);
+    socket1 = require('./socket')(this, 6004),
+    socket2 = require('./socket')(this, 6005),
+    socket3 = require('./socket')(this, 6006),
+    socket4 = require('./socket')(this, 6007),
+    socket5 = require('./socket')(this, 6008),
+    socket6 = require('./socket')(this, 6009);
 
 this.psql = require('./psql.js');
 this.obj = require('./obj');

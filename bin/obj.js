@@ -14,7 +14,7 @@ var proxy = [];
 var wait_client = [];
 
 /* port */
-var port = 7006;
+var port = 6006;
 var proxy_id = 0;
 var test = 0;
 
@@ -172,6 +172,7 @@ client['get_by_name'] = function (name) {
             return client.session[i];
         }
     }
+    return -1;
 }
 
 client['get'] = function (socket) {
@@ -180,6 +181,7 @@ client['get'] = function (socket) {
             return client.session[i];
         }
     }
+    return -1;
 };
 
 client['get_by_pb_ip'] = function (ip) {

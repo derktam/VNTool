@@ -14,23 +14,28 @@ module.exports = function(main, port) {
         var ip = client.remoteAddress.replace(/:/gi,"");
         ip = ip.replace(/f/gi,"");
         client.setMaxListeners(0);
-        if(port == 7004) {
+        if(port == 6004) {
             target_socket = client;
             client.setEncoding('utf8');
         } else {
             client.pause();
-            if(port >= 7006){
-                var check_wait_interval = setInterval(function(){
-                    if(!main.obj.user.check_wait(ip,port)){
-                        clearInterval(check_wait_interval);
-                        main.obj.user.add(client,port, function(packet, socket){
-                            console.log("####[proxy_link]" + packet);
-                            packet = create_packet('proxy_link', packet, true, socket);
-                            console.log(socket.remotePort);
-                            send(socket, packet);
-                        });
-                    }
-                },100);
+            if(port >= 6006){
+                if(main.obj.proxy.get_by_user_ip_port(ip,port) != -1) {
+                    var check_wait_interval = setInterval(function () {
+                        if (!main.obj.user.check_wait(ip, port)) {
+                            clearInterval(check_wait_interval);
+                            main.obj.user.add(client, port, function (packet, socket) {
+                                console.log("####[proxy_link]" + packet);
+                                packet = create_packet('proxy_link', packet, true, socket);
+                                console.log(socket.remotePort);
+                                send(socket, packet);
+                            });
+                        }
+                    }, 100);
+                }else{
+                    console.log('['+port+'][정책 없음]' + ip);
+                    client.end();
+                }
             }else{
                 main.obj.wait_client.add(client);
             }
@@ -38,7 +43,7 @@ module.exports = function(main, port) {
         client.on('data', function (data) {
             //console.log('Received data from client on port %d: %s', client.remotePort, data.toString());
             //console.log('[' +port+']  Bytes received: ' + client.bytesRead);
-            if(port == 7004){
+            if(port == 6004){
                 var packet = json_parse(data);
                 if(packet == -1)    return;
                 switch(packet.type){
@@ -62,13 +67,13 @@ module.exports = function(main, port) {
                             console.log("HandShake OK");
                             async.waterfall([
                                 function(cb) {
-                                    main.psql.check_client(client.localAddress,cb);
+                                    main.psql.check_client(ip,cb);
                                 },
                                 function(check,name,cb) {
                                     if(check){
                                         var packet = create_packet('name_check', 'ok', true, client);
                                         send(client,packet);
-                                        console.log('[7004][접속 성공] ' + name  + " [" + client.localAddress + "]");
+                                        console.log('[6004][접속 성공] ' + name  + " [" + ip + "]");
                                         main.obj.client.connect(client,name);
                                     }else {
                                         var packet = create_packet('name_check', 'name', true, client);
@@ -81,16 +86,25 @@ module.exports = function(main, port) {
                     case 'name_check':
                         async.waterfall([
                             function(cb) {
-                                main.psql.insert_client(packet.data,client.localAddress, cb);
+                                // 중복 체크
+                              main.psql.check_name(packet.data,cb);
+                            },
+                            function(check,cb) {
+                                if(check){
+                                    main.psql.insert_client(packet.data, ip, check, cb);
+                                }else{
+                                    cb(null, false, false);
+                                }
                             },
                             function(check,name,cb) {
                                 if(check){
                                     var packet = create_packet('name_check', 'ok', true, client);
                                     send(client,packet);
-                                    console.log('[7004][접속 성공] ' + name  + " [" + client.localAddress + "]");
+                                    console.log('[6004][접속 성공] ' + name  + " [" + ip + "]");
                                     main.obj.client.connect(client,name,client);
                                 }else{
                                     var packet = create_packet('name_check', 'retry', true, client);
+                                    console.log("중복 닉네임");
                                     send(client,packet);
                                 }
                             }
@@ -98,6 +112,7 @@ module.exports = function(main, port) {
                         break;
                     case 'link':
                         var tmp = packet.data.split('|');
+                        tmp[1] = ip + ":" + tmp[1];
                         console.log("[link 명령] " + tmp);
                         var wait_interval = setInterval(function(){
                             var result = main.obj.wait_client.get(tmp[1]);
@@ -141,7 +156,7 @@ module.exports = function(main, port) {
             }else{
                 var tmp = main.obj.user.get(client);
                 if(tmp != -1){
-                    if(port == 7005)    target_socket = tmp.socket;
+                    if(port == 6005)    target_socket = tmp.socket;
                     else                target_socket=tmp.target_socket;
                     send(target_socket,data,client);
                 }else    console.log("tmp = -1");
@@ -155,19 +170,19 @@ module.exports = function(main, port) {
 
         client.on('end', function () {
             console.log('Client disconnected');
-            if(port != 7004)
+            if(port != 6004)
                 main.obj.user.delete(client,false);
             else
                 main.obj.client.delete(client);
 
             server.getConnections(function (err, count) {
-                console.log('Remaining Connections: ' + count);
+                console.log('[' + port + ']Remaining Connections: ' + count);
             });
         });
         client.on('error', function (err) {
             console.log('Socket Error: ', JSON.stringify(err));
             console.log(util.inspect(err));
-            if(port != 7004)
+            if(port != 6004)
                 main.obj.user.delete(client,true);
             else
                 main.obj.client.delete(client);
@@ -209,7 +224,7 @@ module.exports = function(main, port) {
         }
         var packet = JSON.stringify(tmp);
 
-        if(encrypt)
+        if(encrypt && main.obj.client.get(client) != -1)
             packet = main.obj.client.get(client).key.encrypt(packet,'base64');
 
         return packet;
@@ -219,7 +234,7 @@ module.exports = function(main, port) {
         if(ori_socket != undefined){
             ori_socket.pause();
         }
-        console.log("[전송][" + data.length + "]");
+        //console.log("[전송][" + data.length + "]");
         async.waterfall([
             function(cb) {
                 var success = socket.write(data,function(){
@@ -228,7 +243,7 @@ module.exports = function(main, port) {
             },
             function(success,socket,data,ori_socket,cb) {
                 if (success) {
-                    console.log("[성공][" + data.length + "]");
+                    //console.log("[성공][" + data.length + "]");
                     if(ori_socket != undefined){
                         ori_socket.resume();
                     }

@@ -22,16 +22,28 @@ block content
         div
             .drop-area__item
                 .dummy
-                    | 7006
+                .client_name
+                    | <br />
+                .client_port
+                    | 6006
             .drop-area__item
                 .dummy
-                    | 7007
+                .client_name
+                    | <br />
+                .client_port
+                    | 6007
             .drop-area__item
                 .dummy
-                    | 7008
+                .client_name
+                    | <br />
+                .client_port
+                    | 6008
             .drop-area__item
                 .dummy
-                    | 7009
+                .client_name
+                    | <br />
+                .client_port
+                    | 6009
     .drop-overlay
     .modal.fade.bs-example-modal-sm(tabindex='-1', role='dialog', aria-labelledby='mySmallModalLabel')
         .modal-dialog.modal-sm(style='margin-top:350px;width:300px;')
@@ -58,12 +70,15 @@ block content
                 droppableArr = [], dropAreaTimeout;
 
 
+
         socket.on('link_request_result', function (data) {
             if (data != 'ok') {
                 alert("연결 정책 생성에 실패하였습니다.");
                 link_data.linkok(link_data.instance, false);
             } else {
                 link_data.linkok(link_data.instance, true);
+                $('.client_name',link_data.el).html(link_data.client_name + '('+ link_data.client_port + ')');
+                console.log(link_data.client_name);
             }
             link_data = [];
         });
@@ -78,6 +93,31 @@ block content
         });
 
 
+        $('#input_port').keydown(function(e){
+            if ( e.which == 13 ) {
+                $('#modal_ok').click();
+            }
+        });
+
+        $('body').keydown(function(e){
+            switch(e.which){
+                case 27:
+                    var afterDropFn = function() {
+                        // hide dropArea
+                        classie.remove( dropArea, 'show' );
+                        // remove class 'drag-active' from body
+                        classie.remove( body, 'drag-active' );
+                    };
+                    clearTimeout( dropAreaTimeout );
+                    dropAreaTimeout = setTimeout( afterDropFn, 100 );
+                    break;
+                case 83:
+                    classie.add( body, 'drag-active' );
+                    clearTimeout( dropAreaTimeout );
+                    classie.add( dropArea, 'show' );
+                    break;
+            }
+        });
 
         $('#modal_ok').click(function () {
             link_data.client_prip = $('#input_prip').val();
@@ -95,6 +135,10 @@ block content
 
             socket.emit("link_request",packet);
             $('.modal').modal('hide');
+        });
+
+        $('.close').click(function () {
+            $('#modal_cancel').click();
         });
 
         $('#modal_cancel').click(function () {
@@ -117,7 +161,8 @@ block content
                         link_data.client_name = $(drag_item).text();
                         link_data.state = -1;
                         link_data.instance = instance;
-                        link_data.user_port = 7006;
+                        link_data.el = el;
+                        link_data.user_port = parseInt($('.client_port',el).html());
                         link_data.linkok = function(instance, flag){
                             if(flag)
                                 classie.add( instance.el, 'drop-feedback' );

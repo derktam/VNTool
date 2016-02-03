@@ -25,6 +25,7 @@ var check_client = function(pbip,cb){
                 cb(null);
                 return console.error('error running query', err);
             }
+
             if(result.rows.length == 0)
                 cb(null,false);
             else
@@ -33,7 +34,33 @@ var check_client = function(pbip,cb){
     });
 }
 
-var insert_client = function(name,pbip,cb){
+var check_name = function(name,cb){
+    pg.connect(conString, function(err, client, done) {
+        if(err) {
+            cb(null,false);
+            return console.error('error fetching client from pool', err);
+        }
+
+        name = name.replace(/\n/gi,"");
+
+        client.query('SELECT * FROM clients WHERE name = $1',[name], function(err, result) {
+            //call `done()` to release the client back to the pool
+            done();
+
+            if(err) {
+                cb(null,false);
+                return console.error('error running query', err);
+            }
+
+            if(result.rows.length == 0)
+                cb(null,true);
+            else
+                cb(null,false);
+        });
+    });
+}
+
+var insert_client = function(name, pbip, check, cb){
     pg.connect(conString, function(err, client, done) {
         if(err) {
             cb(null,false);
@@ -42,20 +69,22 @@ var insert_client = function(name,pbip,cb){
         pbip = pbip.replace(/:/gi,"");
         pbip = pbip.replace(/f/gi,"");
         name = name.replace(/\n/gi,"");
+
         client.query('INSERT INTO clients (name, public_ip, private_ip) VALUES($1, $2, $3)', [name, pbip, '127.0.0.1'], function(err, result) {
             //call `done()` to release the client back to the pool
             done();
 
             if(err) {
-                cb(null,false);
+                cb(null,check);
                 return console.error('error running query', err);
             }
-            cb(null,true,name);
+            cb(null,check,name);
         });
     });
 }
 
 module.exports = {
     check_client:check_client,
+    check_name:check_name,
     insert_client:insert_client
 };
