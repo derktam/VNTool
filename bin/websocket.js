@@ -12,9 +12,9 @@ module.exports = function(io, main) {
             var ip = String(socket.handshake.address).replace(/:/gi,"");
             ip = ip.replace(/f/gi,"");
             data.user_ip = ip;
+            console.log(ip);
             if(ip == '127.0.0.1')
                 ip = '192.168.100.252';
-            console.log(ip);
 
             if(!main.obj.proxy.add(data,socket)){
                 socket.emit("link_request_result","fail");

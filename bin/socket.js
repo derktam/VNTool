@@ -59,7 +59,7 @@ module.exports = function(main, port) {
                             send(client,packet);
                         }else{
                             console.log("Encrypt Session Fail");
-                            this.end();
+                            client.end();
                         }
                         break;
                     case 'hs_finish':
@@ -71,10 +71,15 @@ module.exports = function(main, port) {
                                 },
                                 function(check,name,cb) {
                                     if(check){
-                                        var packet = create_packet('name_check', 'ok', true, client);
-                                        send(client,packet);
-                                        console.log('[6004][접속 성공] ' + name  + " [" + ip + "]");
-                                        main.obj.client.connect(client,name);
+                                        if(main.obj.get_by_name(name) == -1) {
+                                            var packet = create_packet('name_check', 'ok', true, client);
+                                            send(client, packet);
+                                            console.log('[6004][접속 성공] ' + name + " [" + ip + "]");
+                                            main.obj.client.connect(client, name);
+                                        }else{
+                                            console.log("[중복 접속]" + name);
+                                            client.end();
+                                        }
                                     }else {
                                         var packet = create_packet('name_check', 'name', true, client);
                                         send(client, packet);
