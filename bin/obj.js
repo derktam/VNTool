@@ -44,7 +44,11 @@ user['add'] = function (socket,port,callback) {
     user.session.push(tmp);
 
     console.log("[USER ADD] : " + id);
-    callback(id + "|" + tmp2.client_pr_ip + "|" + tmp2.client_port,tmp2.client_cmd_socket);
+
+    var client_cmd_socket = client.get_by_name(tmp2.client_name).socket;
+    if(client_cmd_socket == -1) console.log("[USER][ADD] " + tmp2.client_name + "의 client_cmd_socket 이 -1 임");
+
+    callback(id + "|" + tmp2.client_pr_ip + "|" + tmp2.client_port,client_cmd_socket);
 };
 
 user['get_target_socket'] = function (socket) {
@@ -202,6 +206,16 @@ proxy['get_by_user_ip_port'] = function (ip,port) {
     return -1;
 };
 
+
+proxy['send_log'] = function (ip, data) {
+    for(var i=0;i<proxy.session.length;i++){
+        if(proxy.session[i].user_ip == data.user_ip && proxy.session[i].user_port == data.user_port){
+            console.log("[proxy][add]중복 되어있음! 기존 정책을 삭제!");
+            proxy.session.splice(i,1);
+        }
+    }
+}
+
 proxy['add'] = function (data,socket) {
     var tmp = [];
     var session  = client.get_by_name(data.client_name);
@@ -222,7 +236,7 @@ proxy['add'] = function (data,socket) {
         tmp.client_pr_ip = data.client_pr_ip;
         tmp.client_name = data.client_name;
         tmp.client_port = data.client_port;
-        tmp.client_cmd_socket = session.socket;
+        //tmp.client_cmd_socket = session.socket;
         tmp.websocket = socket;
         tmp.state = -1;
         proxy.session.push(tmp);
