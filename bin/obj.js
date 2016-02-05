@@ -206,16 +206,6 @@ proxy['get_by_user_ip_port'] = function (ip,port) {
     return -1;
 };
 
-
-proxy['send_log'] = function (ip, data) {
-    for(var i=0;i<proxy.session.length;i++){
-        if(proxy.session[i].user_ip == data.user_ip && proxy.session[i].user_port == data.user_port){
-            console.log("[proxy][add]중복 되어있음! 기존 정책을 삭제!");
-            proxy.session.splice(i,1);
-        }
-    }
-}
-
 proxy['add'] = function (data,socket) {
     var tmp = [];
     var session  = client.get_by_name(data.client_name);
