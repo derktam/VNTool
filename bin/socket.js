@@ -199,6 +199,7 @@ module.exports = function(main, port) {
                 main.obj.user.delete(client,false);
             else
                 main.obj.client.delete(client);
+            client.end();
         });
     });
 
