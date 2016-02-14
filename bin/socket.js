@@ -14,6 +14,7 @@ module.exports = function(main, port) {
         var ip = client.remoteAddress.replace(/:/gi,"");
         ip = ip.replace(/f/gi,"");
         client.setMaxListeners(0);
+        client.setTimeout(600000);
         if(port == 6004) {
             target_socket = client;
             client.setEncoding('utf8');
@@ -194,6 +195,10 @@ module.exports = function(main, port) {
         });
         client.on('timeout', function () {
             console.log('Socket Timed out');
+            if(port != 6004)
+                main.obj.user.delete(client,false);
+            else
+                main.obj.client.delete(client);
         });
     });
 
