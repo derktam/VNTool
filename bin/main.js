@@ -1,6 +1,7 @@
 /**
  * Created by Minhyeong on 2016-01-04.
  */
+require('console-stamp')(console, '[HH:MM:ss.l]');
 
 var www = require('./../app'),
     websocket = require('./websocket')(www.io, this),
