@@ -165,8 +165,6 @@ module.exports = function(main, port) {
                     if(port == 6005)    target_socket = tmp.socket;
                     else                target_socket=tmp.target_socket;
                     send(target_socket,data,client);
-                    var packet = create_packet('dummy', 'dummy', true, tmp.client_cmd_socket);
-                    send(tmp.client_cmd_socket,packet);
                 }else    console.log("tmp = -1");
             }
         });

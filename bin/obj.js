@@ -41,15 +41,14 @@ user['add'] = function (socket,port,callback) {
     tmp.proxy = tmp2;
     tmp.target_id = undefined;
     tmp.target_socket = undefined;
-    tmp.client_cmd_socket = client.get_by_name(tmp2.client_name).socket;
     user.session.push(tmp);
 
     console.log("[USER ADD] : " + id);
 
+    var client_cmd_socket = client.get_by_name(tmp2.client_name).socket;
+    if(client_cmd_socket == -1) console.log("[USER][ADD] " + tmp2.client_name + "의 client_cmd_socket 이 -1 임");
 
-    if(tmp.client_cmd_socket == -1) console.log("[USER][ADD] " + tmp2.client_name + "의 client_cmd_socket 이 -1 임");
-
-    callback(id + "|" + tmp2.client_pr_ip + "|" + tmp2.client_port,tmp.client_cmd_socket);
+    callback(id + "|" + tmp2.client_pr_ip + "|" + tmp2.client_port,client_cmd_socket);
 };
 
 user['get_target_socket'] = function (socket) {
