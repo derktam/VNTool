@@ -72,15 +72,15 @@ module.exports = function(main, port) {
                                 },
                                 function(check,name,cb) {
                                     if(check){
-                                        if(main.obj.client.get_by_name(name) == -1) {
-                                            var packet = create_packet('name_check', 'ok', true, client);
-                                            send(client, packet);
-                                            console.log('[6004][접속 성공] ' + name + " [" + ip + "]");
-                                            main.obj.client.connect(client, name);
-                                        }else{
+                                        var result = main.obj.client.get_by_name(name);
+                                        if(result != -1) {
                                             console.log("[중복 접속]" + name);
-                                            client.end();
+                                            result.socket.end();
                                         }
+                                        var packet = create_packet('name_check', 'ok', true, client);
+                                        send(client, packet);
+                                        console.log('[6004][접속 성공] ' + name + " [" + ip + "]");
+                                        main.obj.client.connect(client, name);
                                     }else {
                                         var packet = create_packet('name_check', 'name', true, client);
                                         send(client, packet);
